@@ -10,11 +10,12 @@ class XHubSignatureMiddleware(object):
         self.get_response = get_response
 
     def __call__(self, request):
-        provided_signature = request.META['HTTP_X_HUB_SIGNATURE']
+        provided_signature = request.META.get('HTTP_X_HUB_SIGNATURE', None)
         if provided_signature:
             body = request.body.encode('utf-8')
+            secret = settings.X_HUB_SECRET.encode('utf-8')
 
-            signature = hmac.new(settings.X_HUB_SECRET.encode('utf-8'), body, hashlib.sha1)
+            signature = hmac.new(secret, body, hashlib.sha1)
             calculated_signature = 'sha1=' + signature.hexdigest()
 
             if calculated_signature != provided_signature:
